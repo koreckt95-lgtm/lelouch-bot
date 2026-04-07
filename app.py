@@ -7,7 +7,17 @@ import time
 import threading 
 import requests
 from datetime import datetime, timedelta
-from flask import Flask 
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return "Лелуш жив!"
+
+def run_flask():
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+  
 # --- НАСТРОЙКИ ---
 TOKEN = os.getenv("BOT_TOKEN") 
 
@@ -521,6 +531,12 @@ def safe_game(message):
         update_rep(u[0], -cost)
         bot.reply_to(message, f"🔒 **НЕВЕРНО!**\nКод был `{winning_code}`. Вы потеряли `{cost}` 🪷.\nПопробуете еще раз?")
 
-
-print("Бот запущен! Проверь Telegram.")
-bot.infinity_polling()
+if __name__ == "__main__":
+    # Запускаем сервер Flask в фоне
+    threading.Thread(target=run_flask, daemon=True).start()
+    # Даем серверу 2 секунды ожить
+    time.sleep(2)
+    # Запускаем бота
+    print("Бот Лелуш запущен!")
+    bot.infinity_polling(timeout=10, long_polling_timeout=5)
+  
