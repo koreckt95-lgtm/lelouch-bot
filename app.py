@@ -1,9 +1,9 @@
+import os
 import telebot
 from telebot import types
 import sqlite3
 import random
 import time
-import os
 import threading 
 import requests
 from datetime import datetime, timedelta
@@ -211,13 +211,18 @@ def unmute_user(message):
     if is_admin(message) and message.reply_to_message:
         bot.restrict_chat_member(message.chat.id, message.reply_to_message.from_user.id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
         bot.reply_to(message, "🔊 Говори!")
-
 # --- ЗАПУСК ---
-bot.set_my_commands([
-    types.BotCommand("help", "Все команды"),
-    types.BotCommand("profile", "Мой профиль"),
-    types.BotCommand("top", "Рейтинг богачей")
-])# --- ПРОВЕРКА СВЯЗИ ---
+if __name__ == "__main__":
+    # 1. Запускаем Flask для Render в фоне (обязательно daemon=True)
+    threading.Thread(target=run_flask, daemon=True).start()
+    
+    # 2. Даем серверу 2 секунды, чтобы он «зацепился» за порт
+    time.sleep(2)
+    
+    # 3. Запуск самого бота через infinity_polling
+    print("Бот Лелуш запущен!")
+    bot.infinity_polling(timeout=10, long_polling_timeout=5)
+  
 
 @bot.message_handler(func=lambda m: m.text and m.text.lower() == "пинг")
 def ping_pong(message):
