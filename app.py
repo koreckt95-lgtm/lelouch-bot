@@ -3,10 +3,24 @@ import telebot
 from telebot import types
 import sqlite3
 import random
+import flask
 import time
 import requests
 from datetime import datetime, timedelta
+import threading
+from flask import Flask
 
+app = Flask(__name__)
+
+@app.route('/')
+def health_check():
+    return "OK", 200
+
+def run_server():
+    # Render передает порт в переменную окружения PORT
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
+  
 # --- НАСТРОЙКИ ---
 TOKEN = os.getenv("BOT_TOKEN")
 WEATHER_API_KEY = "05e52fae7358456083721512426050"
@@ -515,6 +529,12 @@ def safe_game(message):
         bot.reply_to(message, f"🔒 **НЕВЕРНО!**\nКод был `{winning_code}`. Вы потеряли `{cost}` 🪷.\nПопробуете еще раз?")
 
 
-print("Бот запущен! Проверь Telegram.")
-bot.infinity_polling()
+if __name__ == "__main__":
+    # Запускаем веб-сервер в фоновом потоке
+    threading.Thread(target=run_server, daemon=True).start()
+    
+    # Запускаем бота в основном потоке
+    print("Бот Лелуш запущен и слушает команды...")
+    bot.infinity_polling()
+  
       
