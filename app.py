@@ -549,7 +549,7 @@ def lelouch_ai(message):
         return bot.reply_to(message, "👁 Мой разум заблокирован. Проверь ключи.")
 
     user_query = message.text
-    for name in ["лелуш", "ирис"]:
+    for name in ["лелуш", "Лелуш"]:
         if user_query.lower().startswith(name):
             user_query = user_query[len(name):].strip().lstrip(",").strip()
             break
