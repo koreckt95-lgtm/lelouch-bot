@@ -40,8 +40,11 @@ else:
           
 
 # --- БАЗА ДАННЫХ ---
-conn = sqlite3.connect("iris_final_v3.db", check_same_thread=False)
+# Настройка базы данных для работы в нескольких потоках
+conn = sqlite3.connect("iris_final_v3.db", check_same_thread=False, isolation_level=None)
+conn.execute('PRAGMA journal_mode=WAL;') # Включает режим одновременного чтения и записи
 cursor = conn.cursor()
+
 
 # 1. Сначала пытаемся создать таблицу с нужной колонкой (для новых баз)
 cursor.execute('''CREATE TABLE IF NOT EXISTS users 
