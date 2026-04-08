@@ -480,4 +480,41 @@ def slots_game(message):
         bot.reply_to(message, f"💰 **НЕПЛОХО!**\nВыигрыш: `{win}` 🪷!")
     else:
         bot.reply_to(message, "☁️ Удача сегодня не на вашей стороне. Попробуйте снова!")
-@bot.m
+@bot.message_handler(func=lambda m: m.text and m.text.lower().startswith("сейф"))
+def safe_game(message):
+    # 1. Получаем данные игрока
+    u = get_user(message.from_user.id, message.from_user.first_name)
+    cost = 100 
+    
+    # 2. Проверяем баланс (u[2] — это твоя колонка rep)
+    if u[2] < cost:
+        return bot.reply_to(message, f"📉 Для взлома сейфа нужно `{cost}` 🪷. У вас всего `{u[2]}`.")
+
+    # 3. Обрабатываем ввод числа
+    args = message.text.split()
+    if len(args) < 2:
+        return bot.reply_to(message, "🔢 Укажите код! Пример: `сейф 5` (от 1 до 10)")
+
+    try:
+        guess = int(args[1])
+        if not (1 <= guess <= 10):
+            return bot.reply_to(message, "⚠️ Код должен быть в диапазоне от 1 до 10!")
+    except ValueError:
+        return bot.reply_to(message, "❌ Введите число, а не текст!")
+
+    # 4. Логика выигрыша
+    winning_code = random.randint(1, 10)
+    
+    if guess == winning_code:
+        prize = cost * 10
+        # Обновляем через твою функцию update_rep
+        update_rep(u[0], prize - cost) 
+        bot.reply_to(message, f"🔓 **СЕЙФ ОТКРЫТ!**\nВы угадали код `{winning_code}` и получили `{prize}` 🪷!")
+    else:
+        update_rep(u[0], -cost)
+        bot.reply_to(message, f"🔒 **НЕВЕРНО!**\nКод был `{winning_code}`. Вы потеряли `{cost}` 🪷.\nПопробуете еще раз?")
+
+
+print("Бот запущен! Проверь Telegram.")
+bot.infinity_polling()
+      
