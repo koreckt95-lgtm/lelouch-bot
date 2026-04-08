@@ -31,18 +31,8 @@ WEATHER_API_KEY = "05e52fae73584560837215124260504"
 
 bot = telebot.TeleBot(TOKEN)
 BOT_NAME = "ирис"
-# --- Инициализация ИИ ---
-GEMINI_KEY = os.environ.get("GEMINI_KEY")
-ai_client = None
-
-if GEMINI_KEY:
-    try:
-        # Создаем подключение через новый формат
-        ai_client = genai.Client(api_key=GEMINI_KEY)
-    except Exception as e:
-        print(f"Ошибка ИИ: {e}")
+ai_client = genai.Client(api_key=GEMINI_KEY)
           
-
 # ... (дальше идет база данных и функции команд)
 
 
@@ -546,11 +536,11 @@ def safe_game(message):
 @bot.message_handler(func=lambda m: m.text and m.text.lower().startswith(("лелуш", "ирис")))
 def lelouch_ai_logic(message):
     query = message.text.strip()
-
-    @bot.message_handler(func=lambda m: m.text and m.text.lower().startswith(("лелуш", "ирис")))
+    
+@bot.message_handler(func=lambda m: m.text and m.text.lower().startswith(("лелуш", "ирис")))
 def lelouch_ai(message):
     if ai_client is None:
-        return bot.reply_to(message, "👁 Мои мысли заблокированы. Проверь GEMINI_KEY.")
+        return bot.reply_to(message, "👁 Мой разум заблокирован. Проверь ключи.")
 
     user_query = message.text
     for name in ["лелуш", "ирис"]:
@@ -564,15 +554,15 @@ def lelouch_ai(message):
     bot.send_chat_action(message.chat.id, 'typing')
 
     try:
-        # Новый формат запроса для библиотеки google-genai
+        # Здесь важны 4 пробела перед 'result'
         result = ai_client.models.generate_content(
             model="gemini-1.5-flash",
-            contents=f"Ты — Лелуш Ламперуж. Отвечай холодно и пафосно. Вопрос: {user_query}"
+            contents=f"Ты — Лелуш Ламперуж. Отвечай холодно. Вопрос: {user_query}"
         )
         bot.reply_to(message, f"👁 **Лелуш:**\n\n{result.text}", parse_mode="Markdown")
     except Exception as e:
-        print(f"Ошибка запроса: {e}")
-        bot.reply_to(message, "⚠️ Помеха связи. Попробуй еще раз.")
+        bot.reply_to(message, f"⚠️ Помеха связи: {str(e)[:50]}...")
+        
         
     
     # Запускаем бота в основном потоке
