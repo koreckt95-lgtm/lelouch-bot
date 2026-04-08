@@ -537,48 +537,25 @@ def safe_game(message):
     else:
         update_rep(u[0], -cost)
         bot.reply_to(message, f"🔒 **НЕВЕРНО!**\nКод был `{winning_code}`. Вы потеряли `{cost}` 🪷.\nПопробуете еще раз?")
-# --- ИНТЕЛЛЕКТ ЛЕЛУША (GEMINI) ---
 @bot.message_handler(func=lambda m: m.text and m.text.lower().startswith(("лелуш", "ирис")))
 def lelouch_ai(message):
-    if ai_client is None:
-        return bot.reply_to(message, "👁 Мой разум заблокирован. Проверь GEMINI_KEY в настройках Render.")
-
-    # Очищаем текст от имени бота
-    user_query = message.text.lower()
-    for name in ["лелуш", "ирис"]:
-        if user_query.startswith(name):
-            user_query = user_query[len(name):].strip().lstrip(",").strip()
-            break
-
-    if not user_query:
-        return bot.reply_to(message, "👁 Слушаю тебя, мой союзник. Что ты хочешь обсудить?")
+    # ПРОВЕРЯЕМ ai_model (а не ai_client!)
+    if ai_model is None:
+        return bot.reply_to(message, "👁 Мой разум заблокирован. Проверь GEMINI_KEY.")
+    
+    query = message.text.lower().replace("лелуш", "").replace("ирис", "").strip()
+    if not query:
+        return bot.reply_to(message, "Слушаю тебя.")
 
     bot.send_chat_action(message.chat.id, 'typing')
-
     try:
-        # Настройка личности Лелуша
-        instruction = "Ты — Лелуш Ламперуж. Отвечай холодно, мудро, используй шахматные термины. Твой собеседник — твой подчиненный."
-        
-        result = ai_client.models.generate_content(
-            model="gemini-1.5-flash",
-            contents=f"{instruction}\n\nВопрос: {user_query}"
-        )
-        bot.reply_to(message, f"👁 **Лелуш:**\n\n{result.text}", parse_mode="Markdown")
+        # ИСПОЛЬЗУЕМ ai_model
+        response = ai_model.generate_content(f"Ты — Лелуш Ламперуж. Отвечай холодно. Вопрос: {query}")
+        bot.reply_to(message, f"👁 **Лелуш:**\n\n{response.text}", parse_mode="Markdown")
     except Exception as e:
-        print(f"AI Error: {e}")
+        print(f"Ошибка ИИ: {e}")
         bot.reply_to(message, "⚠️ Система перегружена. Даже королям нужен отдых.")
-
-# --- ЗАПУСК БОТА И СЕРВЕРА ---
-if __name__ == "__main__":
-    # 1. Запуск Flask сервера (для Render)
-    # daemon=True гарантирует, что сервер не зависнет при перезагрузке
-    threading.Thread(target=run_server, daemon=True).start()
-
-    # 2. Запуск бота
-    print("👁 Лелуш вышел на связь. Бот запущен!")
-    # skip_pending=True очищает очередь старых сообщений, чтобы избежать ошибки 409
-    bot.infinity_polling(none_stop=True, skip_pending=True)
-    
+        
         
         
     # --- ЗАПУСК БОТА И СЕРВЕРА ---
