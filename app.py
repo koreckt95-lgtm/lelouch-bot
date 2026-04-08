@@ -23,7 +23,7 @@ def run_server():
   
 # --- НАСТРОЙКИ ---
 TOKEN = os.getenv("BOT_TOKEN")
-WEATHER_API_KEY = "05e52fae7358456083721512426050"
+WEATHER_API_KEY = "05e52fae73584560837215124260504"
 
 
 
