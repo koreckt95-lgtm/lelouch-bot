@@ -5,7 +5,6 @@ import sqlite3
 import random
 import time
 import requests
-
 from datetime import datetime, timedelta
 
 # --- НАСТРОЙКИ ---
