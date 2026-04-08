@@ -2,7 +2,7 @@ import os
 import telebot 
 from telebot import types
 import sqlite3
-import g4f
+import google.generativeai as genai
 import random
 import flask
 import time
@@ -25,6 +25,11 @@ def run_server():
 # --- НАСТРОЙКИ ---
 TOKEN = os.getenv("BOT_TOKEN")
 WEATHER_API_KEY = "05e52fae73584560837215124260504"
+# --- АКТИВАЦИЯ ИИ GEMINI ---
+GEMINI_KEY = os.environ.get("GEMINI_KEY")
+genai.configure(api_key=GEMINI_KEY)
+# Используем самую быструю и новую модель
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 
 
@@ -528,47 +533,45 @@ def safe_game(message):
     else:
         update_rep(u[0], -cost)
         bot.reply_to(message, f"🔒 **НЕВЕРНО!**\nКод был `{winning_code}`. Вы потеряли `{cost}` 🪷.\nПопробуете еще раз?")
-
 @bot.message_handler(func=lambda m: m.text and m.text.lower().startswith(("лелуш", "ирис")))
-def lelouch_ai(message):
-    # Очистка запроса от имени
+def lelouch_ai_logic(message):
     query = message.text.strip()
+    
+    # Убираем имя бота из начала сообщения, чтобы ИИ видел только сам вопрос
     for name in ["лелуш", "ирис", "Лелуш", "Ирис"]:
         if query.lower().startswith(name.lower()):
             query = query[len(name):].strip().lstrip(",").strip()
             break
 
+    # Если после имени ничего не написано
     if not query:
-        return bot.reply_to(message, "👁 Ты звал меня? Говори, но не трать моё время.")
+        return bot.reply_to(message, "👁 Ты звал меня, союзник? Я слушаю, но будь краток.")
 
+    # Показываем статус "печатает..."
     bot.send_chat_action(message.chat.id, 'typing')
 
-    # Установка личности
+    # Настройка личности Лелуша
     prompt = (
-        "Ты — Лелуш Ламперуж, лидер Ордена Черных Рыцарей. "
-        "Ты гениальный стратег. Твой стиль: пафосный, уверенный, шахматный. "
-        "Обращайся к юзеру 'союзник' или 'пешка'. Отвечай кратко и дерзко."
+        f"Ты — Лелуш Ламперуж, гениальный стратег и лидер Ордена Черных Рыцарей. "
+        f"Твой стиль: пафосный, холодный, уверенный. Ты всегда на 10 шагов впереди. "
+        f"Используй шахматные термины (шах, мат, рокировка). "
+        f"Обращайся к пользователю 'мой союзник'. Твоя цель — изменить мир. "
+        f"Ответь на этот вопрос: {query}"
     )
 
     try:
-        response = g4f.ChatCompletion.create(
-            model=g4f.models.gpt_35_turbo,
-            messages=[
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": query}
-            ],
-        )
-        if response:
-            bot.reply_to(message, f"👁 **Лелуш:**\n\n{response}")
-        else:
-            bot.reply_to(message, "💢 Сигнал прерван. Британия наступает, повтори позже.")
-    except Exception:
-        bot.reply_to(message, "⚠️ Ошибка связи. Даже у стратега бывают помехи.")
+        # Генерация ответа через Google Gemini
+        response = model.generate_content(prompt)
         
-
-if __name__ == "__main__":
-    # Запускаем веб-сервер в фоновом потоке
-    threading.Thread(target=run_server, daemon=True).start()
+        if response.text:
+            bot.reply_to(message, f"👁 **Лелуш:**\n\n{response.text}")
+        else:
+            bot.reply_to(message, "💢 Мои расчеты зашли в тупик. Попробуй переформулировать.")
+            
+    except Exception as e:
+        print(f"Ошибка Gemini: {e}")
+        bot.reply_to(message, "⚠️ Связь со штабом прервана. Видимо, Британия блокирует сигнал.")
+        
     
     # Запускаем бота в основном потоке
     print("Бот Лелуш запущен и слушает команды...")
