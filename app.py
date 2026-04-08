@@ -1,7 +1,7 @@
 import os
 import telebot 
 from telebot import types
-from google import genai
+import google.generativeai as genai
 import sqlite3
 import random
 import flask
