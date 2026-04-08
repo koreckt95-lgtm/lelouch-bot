@@ -26,24 +26,18 @@ def run_server():
 TOKEN = os.getenv("BOT_TOKEN")
 WEATHER_API_KEY = "05e52fae73584560837215124260504"
 
-
-# ... (твой код выше)
-
 bot = telebot.TeleBot(TOKEN)
 BOT_NAME = "ирис"
-# 1. Сначала получаем ключ из системы
-GEMINI_KEY = os.environ.get("GEMINI_KEY") 
 
-# 2. И только ПОТОМ создаем клиента ИИ
+# СНАЧАЛА ДОСТАЕМ КЛЮЧ:
+GEMINI_KEY = os.environ.get("GEMINI_KEY")
+
+# ПОТОМ ИСПОЛЬЗУЕМ:
 if GEMINI_KEY:
     ai_client = genai.Client(api_key=GEMINI_KEY)
 else:
     ai_client = None
-    print("⚠️ Ошибка: Переменная GEMINI_KEY не найдена!")
-    
           
-# ... (дальше идет база данных и функции команд)
-
 
 # --- БАЗА ДАННЫХ ---
 conn = sqlite3.connect("iris_final_v3.db", check_same_thread=False)
