@@ -540,29 +540,27 @@ def safe_game(message):
 @bot.message_handler(func=lambda m: m.text and m.text.lower().startswith(("лелуш", "ирис")))
 def lelouch_ai(message):
     if ai_model is None:
-        return bot.reply_to(message, "👁 Мой разум заблокирован. Проверь GEMINI_KEY.")
+        return bot.reply_to(message, "👁 Модель не инициализирована. Проверь GEMINI_KEY в Render.")
     
-    # Очищаем запрос
-    query = message.text.lower().replace("лелуш", "").replace("ирис", "").strip()
+    query = message.text.lower().replace("лелуш", "").replace("ирис", "").strip().lstrip(",").strip()
     if not query:
-        return bot.reply_to(message, "Слушаю тебя.")
+        return bot.reply_to(message, "👁 Слушаю.")
 
     bot.send_chat_action(message.chat.id, 'typing')
     try:
-        # ПРАВИЛЬНЫЙ ВЫЗОВ
-        full_prompt = f"Ты — Лелуш Ламперуж из аниме Код Гиас. Отвечай холодно и высокомерно. Вопрос: {query}"
-        result = ai_model.generate_content(full_prompt)
+        # Упрощенный вызов для теста
+        response = ai_model.generate_content(f"Отвечай как Лелуш: {query}")
         
-        # Проверяем, есть ли текст в ответе
-        if result and result.text:
-            bot.reply_to(message, f"👁 **Лелуш:**\n\n{result.text}", parse_mode="Markdown")
+        if response and response.text:
+            bot.reply_to(message, f"👁 **Лелуш:**\n\n{response.text}", parse_mode="Markdown")
         else:
-            bot.reply_to(message, "👁 Молчание — мой ответ.")
+            bot.reply_to(message, "👁 ИИ вернул пустой ответ (возможно, цензура).")
             
     except Exception as e:
-        print(f"Ошибка ИИ: {e}")
-        bot.reply_to(message, "⚠️ Система перегружена. Даже королям нужен отдых.")
-
+        # БОТ НАПИШЕТ ТЕБЕ ПРИЧИНУ ОШИБКИ
+        error_text = str(e)
+        print(f"Ошибка ИИ: {error_text}")
+        bot.reply_to(message, f"❌ Ошибка ИИ: {error_text[:100]}...")
         
         
         
