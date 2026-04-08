@@ -2,6 +2,7 @@ import os
 import telebot 
 from telebot import types
 import sqlite3
+import g4f
 import random
 import flask
 import time
@@ -528,6 +529,42 @@ def safe_game(message):
         update_rep(u[0], -cost)
         bot.reply_to(message, f"🔒 **НЕВЕРНО!**\nКод был `{winning_code}`. Вы потеряли `{cost}` 🪷.\nПопробуете еще раз?")
 
+@bot.message_handler(func=lambda m: m.text and m.text.lower().startswith(("лелуш", "ирис")))
+def lelouch_ai(message):
+    # Очистка запроса от имени
+    query = message.text.strip()
+    for name in ["лелуш", "ирис", "Лелуш", "Ирис"]:
+        if query.lower().startswith(name.lower()):
+            query = query[len(name):].strip().lstrip(",").strip()
+            break
+
+    if not query:
+        return bot.reply_to(message, "👁 Ты звал меня? Говори, но не трать моё время.")
+
+    bot.send_chat_action(message.chat.id, 'typing')
+
+    # Установка личности
+    prompt = (
+        "Ты — Лелуш Ламперуж, лидер Ордена Черных Рыцарей. "
+        "Ты гениальный стратег. Твой стиль: пафосный, уверенный, шахматный. "
+        "Обращайся к юзеру 'союзник' или 'пешка'. Отвечай кратко и дерзко."
+    )
+
+    try:
+        response = g4f.ChatCompletion.create(
+            model=g4f.models.gpt_35_turbo,
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": query}
+            ],
+        )
+        if response:
+            bot.reply_to(message, f"👁 **Лелуш:**\n\n{response}")
+        else:
+            bot.reply_to(message, "💢 Сигнал прерван. Британия наступает, повтори позже.")
+    except Exception:
+        bot.reply_to(message, "⚠️ Ошибка связи. Даже у стратега бывают помехи.")
+        
 
 if __name__ == "__main__":
     # Запускаем веб-сервер в фоновом потоке
