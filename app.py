@@ -567,9 +567,15 @@ def lelouch_ai(message):
         bot.reply_to(message, f"⚠️ Помеха связи: {str(e)[:50]}...")
         
         
+    # --- ЗАПУСК БОТА И СЕРВЕРА ---
+if __name__ == "__main__":
+    # Запускаем веб-сервер Flask в фоновом режиме (чтобы Render был доволен)
+    server_thread = threading.Thread(target=run_server)
+    server_thread.start()
+
+    # Запускаем самого бота на постоянную прослушку сообщений
+    print("👁 Лелуш вышел на связь. Бот запущен!")
+    bot.infinity_polling(none_stop=True, timeout=90, long_polling_timeout=5)
     
-    # Запускаем бота в основном потоке
-    print("Бот Лелуш запущен и слушает команды...")
-    bot.infinity_polling()
   
       
