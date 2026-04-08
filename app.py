@@ -31,17 +31,16 @@ WEATHER_API_KEY = "05e52fae73584560837215124260504"
 
 bot = telebot.TeleBot(TOKEN)
 BOT_NAME = "ирис"
-
-# СТРОКА 38: ВСТАВЛЯЙ СЮДА
-# --- АКТИВАЦИЯ ИИ GEMINI ---
+# Настройка ИИ Gemini (отдельно от токена бота)
 GEMINI_KEY = os.environ.get("GEMINI_KEY")
+ai_client = None
 
 if GEMINI_KEY:
-    genai.configure(api_key=GEMINI_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-else:
-    model = None
-    print("⚠️ ОШИБКА: GEMINI_KEY не найден в настройках Render!")
+    try:
+        ai_client = genai.Client(api_key=GEMINI_KEY)
+    except Exception as e:
+        print(f"Ошибка инициализации Gemini: {e}")
+        
 
 # ... (дальше идет база данных и функции команд)
 
