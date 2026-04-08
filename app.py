@@ -25,6 +25,7 @@ def run_server():
 # --- НАСТРОЙКИ ---
 TOKEN = os.getenv("BOT_TOKEN")
 WEATHER_API_KEY = "05e52fae73584560837215124260504"
+bot = telebot.TeleBot(TOKEN)
 # Убедись, что перед этими строками НЕТ пробелов:
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 
