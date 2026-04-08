@@ -17,6 +17,7 @@ def index():
 def run_flask():
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+    
   
 # --- НАСТРОЙКИ ---
 TOKEN = os.getenv("BOT_TOKEN") 
@@ -534,11 +535,14 @@ def safe_game(message):
         bot.reply_to(message, f"🔒 **НЕВЕРНО!**\nКод был `{winning_code}`. Вы потеряли `{cost}` 🪷.\nПопробуете еще раз?")
 
 if __name__ == "__main__":
-    # Запускаем сервер Flask в фоне
+    # Запускаем Flask в отдельном потоке (параллельно)
     threading.Thread(target=run_flask, daemon=True).start()
-    # Даем серверу 2 секунды ожить
+    
+    # Пауза, чтобы сервер успел открыться
     time.sleep(2)
-    # Запускаем бота
+    
+    # Запуск самого бота
     print("Бот Лелуш запущен!")
     bot.infinity_polling(timeout=10, long_polling_timeout=5)
+    
   
