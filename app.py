@@ -25,15 +25,15 @@ def run_server():
 # --- НАСТРОЙКИ ---
 TOKEN = os.getenv("BOT_TOKEN")
 WEATHER_API_KEY = "05e52fae73584560837215124260504"
+# Убедись, что перед этими строками НЕТ пробелов:
+GEMINI_KEY = os.getenv("GEMINI_KEY")
 
-bot = telebot.TeleBot(TOKEN)
-BOT_NAME = "ирис"
- GEMINI_KEY = os.getenv("GEMINI_KEY")
 if GEMINI_KEY:
     genai.configure(api_key=GEMINI_KEY)
     ai_model = genai.GenerativeModel('gemini-1.5-flash')
 else:
     ai_model = None
+    
     
 
 # --- БАЗА ДАННЫХ ---
