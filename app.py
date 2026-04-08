@@ -540,27 +540,27 @@ def safe_game(message):
 @bot.message_handler(func=lambda m: m.text and m.text.lower().startswith(("лелуш", "ирис")))
 def lelouch_ai(message):
     if ai_model is None:
-        return bot.reply_to(message, "👁 Модель не инициализирована. Проверь GEMINI_KEY в Render.")
+        return bot.reply_to(message, "👁 Модель пуста. Проверь GEMINI_KEY в настройках Render.")
     
-    query = message.text.lower().replace("лелуш", "").replace("ирис", "").strip().lstrip(",").strip()
+    query = message.text.lower().replace("лелуш", "").replace("ирис", "").strip()
     if not query:
         return bot.reply_to(message, "👁 Слушаю.")
 
     bot.send_chat_action(message.chat.id, 'typing')
     try:
-        # Упрощенный вызов для теста
-        response = ai_model.generate_content(f"Отвечай как Лелуш: {query}")
+        # Максимально простой вызов
+        response = ai_model.generate_content(query)
         
         if response and response.text:
             bot.reply_to(message, f"👁 **Лелуш:**\n\n{response.text}", parse_mode="Markdown")
         else:
-            bot.reply_to(message, "👁 ИИ вернул пустой ответ (возможно, цензура).")
+            bot.reply_to(message, "👁 ИИ вернул пустой ответ (цензура или ошибка).")
             
     except Exception as e:
-        # БОТ НАПИШЕТ ТЕБЕ ПРИЧИНУ ОШИБКИ
-        error_text = str(e)
-        print(f"Ошибка ИИ: {error_text}")
-        bot.reply_to(message, f"❌ Ошибка ИИ: {error_text[:100]}...")
+        # Бот выдаст ТЕКСТ ошибки. Это нам и нужно!
+        error_msg = str(e)
+        bot.reply_to(message, f"⚠️ Ошибка ИИ: {error_msg[:100]}...")
+        
         
         
         
