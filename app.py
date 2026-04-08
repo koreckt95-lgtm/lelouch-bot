@@ -28,16 +28,13 @@ WEATHER_API_KEY = "05e52fae73584560837215124260504"
 
 bot = telebot.TeleBot(TOKEN)
 BOT_NAME = "ирис"
-
-# СНАЧАЛА ДОСТАЕМ КЛЮЧ:
-GEMINI_KEY = os.environ.get("GEMINI_KEY")
-
-# ПОТОМ ИСПОЛЬЗУЕМ:
+ GEMINI_KEY = os.getenv("GEMINI_KEY")
 if GEMINI_KEY:
-    ai_client = genai.Client(api_key=GEMINI_KEY)
+    genai.configure(api_key=GEMINI_KEY)
+    ai_model = genai.GenerativeModel('gemini-1.5-flash')
 else:
-    ai_client = None
-          
+    ai_model = None
+    
 
 # --- БАЗА ДАННЫХ ---
 # Настройка базы данных для работы в нескольких потоках
