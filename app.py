@@ -223,15 +223,17 @@ def unmute_user(message):
         bot.reply_to(message, "🔊 Говори!")
 # --- ЗАПУСК ---
 if __name__ == "__main__":
-    # 1. Запускаем Flask для Render в фоне (обязательно daemon=True)
+    # 1. Запускаем сервер Flask в отдельном потоке
+    # Это позволит Render видеть, что бот живой, не мешая самому боту
     threading.Thread(target=run_flask, daemon=True).start()
     
-    # 2. Даем серверу 2 секунды, чтобы он «зацепился» за порт
+    # 2. Небольшая пауза для стабильности
     time.sleep(2)
     
-    # 3. Запуск самого бота через infinity_polling
+    # 3. Запуск самого бота
     print("Бот Лелуш запущен!")
     bot.infinity_polling(timeout=10, long_polling_timeout=5)
+    
   
 
 @bot.message_handler(func=lambda m: m.text and m.text.lower() == "пинг")
