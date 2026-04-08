@@ -1,8 +1,8 @@
 import os
 import telebot 
 from telebot import types
+from google import genai
 import sqlite3
-import google.generativeai as genai
 import random
 import flask
 import time
@@ -31,16 +31,17 @@ WEATHER_API_KEY = "05e52fae73584560837215124260504"
 
 bot = telebot.TeleBot(TOKEN)
 BOT_NAME = "ирис"
-# Настройка ИИ Gemini (отдельно от токена бота)
+# --- Инициализация ИИ ---
 GEMINI_KEY = os.environ.get("GEMINI_KEY")
 ai_client = None
 
 if GEMINI_KEY:
     try:
+        # Создаем подключение через новый формат
         ai_client = genai.Client(api_key=GEMINI_KEY)
     except Exception as e:
-        print(f"Ошибка инициализации Gemini: {e}")
-        
+        print(f"Ошибка ИИ: {e}")
+          
 
 # ... (дальше идет база данных и функции команд)
 
@@ -545,41 +546,33 @@ def safe_game(message):
 @bot.message_handler(func=lambda m: m.text and m.text.lower().startswith(("лелуш", "ирис")))
 def lelouch_ai_logic(message):
     query = message.text.strip()
-    
-    # Убираем имя бота из начала сообщения, чтобы ИИ видел только сам вопрос
-    for name in ["лелуш", "ирис", "Лелуш", "Ирис"]:
-        if query.lower().startswith(name.lower()):
-            query = query[len(name):].strip().lstrip(",").strip()
+
+    @bot.message_handler(func=lambda m: m.text and m.text.lower().startswith(("лелуш", "ирис")))
+def lelouch_ai(message):
+    if ai_client is None:
+        return bot.reply_to(message, "👁 Мои мысли заблокированы. Проверь GEMINI_KEY.")
+
+    user_query = message.text
+    for name in ["лелуш", "ирис"]:
+        if user_query.lower().startswith(name):
+            user_query = user_query[len(name):].strip().lstrip(",").strip()
             break
 
-    # Если после имени ничего не написано
-    if not query:
-        return bot.reply_to(message, "👁 Ты звал меня, союзник? Я слушаю, но будь краток.")
+    if not user_query:
+        return bot.reply_to(message, "👁 Слушаю тебя, мой союзник.")
 
-    # Показываем статус "печатает..."
     bot.send_chat_action(message.chat.id, 'typing')
 
-    # Настройка личности Лелуша
-    prompt = (
-        f"Ты — Лелуш Ламперуж, гениальный стратег и лидер Ордена Черных Рыцарей. "
-        f"Твой стиль: пафосный, холодный, уверенный. Ты всегда на 10 шагов впереди. "
-        f"Используй шахматные термины (шах, мат, рокировка). "
-        f"Обращайся к пользователю 'мой союзник'. Твоя цель — изменить мир. "
-        f"Ответь на этот вопрос: {query}"
-    )
-
     try:
-        # Генерация ответа через Google Gemini
-        response = model.generate_content(prompt)
-        
-        if response.text:
-            bot.reply_to(message, f"👁 **Лелуш:**\n\n{response.text}")
-        else:
-            bot.reply_to(message, "💢 Мои расчеты зашли в тупик. Попробуй переформулировать.")
-            
+        # Новый формат запроса для библиотеки google-genai
+        result = ai_client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=f"Ты — Лелуш Ламперуж. Отвечай холодно и пафосно. Вопрос: {user_query}"
+        )
+        bot.reply_to(message, f"👁 **Лелуш:**\n\n{result.text}", parse_mode="Markdown")
     except Exception as e:
-        print(f"Ошибка Gemini: {e}")
-        bot.reply_to(message, "⚠️ Связь со штабом прервана. Видимо, Британия блокирует сигнал.")
+        print(f"Ошибка запроса: {e}")
+        bot.reply_to(message, "⚠️ Помеха связи. Попробуй еще раз.")
         
     
     # Запускаем бота в основном потоке
