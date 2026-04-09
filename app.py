@@ -30,12 +30,9 @@ bot = telebot.TeleBot(TOKEN)
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 if GEMINI_KEY:
     genai.configure(api_key=GEMINI_KEY)
-    # МЕНЯЕМ НАЗВАНИЕ МОДЕЛИ НА СТАНДАРТНОЕ
     ai_model = genai.GenerativeModel('gemini-pro') 
 else:
     ai_model = None
-    
-    
     
 
 # --- БАЗА ДАННЫХ ---
