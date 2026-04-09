@@ -28,12 +28,13 @@ WEATHER_API_KEY = "05e52fae73584560837215124260504"
 bot = telebot.TeleBot(TOKEN)
 # Убедись, что перед этими строками НЕТ пробелов:
 GEMINI_KEY = os.getenv("GEMINI_KEY")
-
 if GEMINI_KEY:
     genai.configure(api_key=GEMINI_KEY)
-    ai_model = genai.GenerativeModel('gemini-1.5-flash')
+    # МЕНЯЕМ НАЗВАНИЕ МОДЕЛИ НА СТАНДАРТНОЕ
+    ai_model = genai.GenerativeModel('gemini-pro') 
 else:
     ai_model = None
+    
     
     
 
@@ -547,19 +548,21 @@ def lelouch_ai(message):
         return bot.reply_to(message, "👁 Слушаю.")
 
     bot.send_chat_action(message.chat.id, 'typing')
+    
+    # --- ВОТ ТОТ САМЫЙ КУСОК ---
     try:
-        # Максимально простой вызов
-        response = ai_model.generate_content(query)
+        # Прямой вызов без лишних f-строк внутри
+        prompt = f"Ты — Лелуш. Отвечай кратко на вопрос: {query}"
+        response = ai_model.generate_content(prompt)
         
-        if response and response.text:
-            bot.reply_to(message, f"👁 **Лелуш:**\n\n{response.text}", parse_mode="Markdown")
-        else:
-            bot.reply_to(message, "👁 ИИ вернул пустой ответ (цензура или ошибка).")
+        if response.text:
+            bot.reply_to(message, f"👁 **Лелуш:**\n\n{response.text}")
             
     except Exception as e:
-        # Бот выдаст ТЕКСТ ошибки. Это нам и нужно!
-        error_msg = str(e)
-        bot.reply_to(message, f"⚠️ Ошибка ИИ: {error_msg[:100]}...")
+        # Это обязательно нужно, чтобы бот не падал при ошибках
+        bot.reply_to(message, f"⚠️ Ошибка ИИ: {str(e)[:100]}...")
+    # -----------------------------
+
         
         
         
