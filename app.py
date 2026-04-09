@@ -538,31 +538,24 @@ def safe_game(message):
         bot.reply_to(message, f"🔒 **НЕВЕРНО!**\nКод был `{winning_code}`. Вы потеряли `{cost}` 🪷.\nПопробуете еще раз?")
 @bot.message_handler(func=lambda m: m.text and m.text.lower().startswith(("лелуш", "ирис")))
 def lelouch_ai(message):
-    if ai_model is None:
-        return bot.reply_to(message, "👁 Модель пуста. Проверь GEMINI_KEY в настройках Render.")
-    
+    # Очищаем текст от команды
     query = message.text.lower().replace("лелуш", "").replace("ирис", "").strip()
+    
+    # ЕСЛИ ПРИШЛО ТОЛЬКО ИМЯ (пустой запрос)
     if not query:
-        return bot.reply_to(message, "👁 Слушаю.")
+        return bot.reply_to(message, "Слушаю тебя, мой верный подданный. У тебя есть вопрос к императору?")
+
+    # ЕСЛИ ЕСТЬ ТЕКСТ ПОСЛЕ ИМЕНИ — ИДЕМ К ИИ
+    if ai_model is None:
+        return bot.reply_to(message, "👁 Мой разум заблокирован (проверь ключ).")
 
     bot.send_chat_action(message.chat.id, 'typing')
-    
-    # --- ВОТ ТОТ САМЫЙ КУСОК ---
     try:
-        # Прямой вызов без лишних f-строк внутри
-        prompt = f"Ты — Лелуш. Отвечай кратко на вопрос: {query}"
-        response = ai_model.generate_content(prompt)
-        
-        if response.text:
-            bot.reply_to(message, f"👁 **Лелуш:**\n\n{response.text}")
-            
+        response = ai_model.generate_content(f"Ты — Лелуш. Отвечай кратко: {query}")
+        bot.reply_to(message, f"👁 **Лелуш:**\n\n{response.text}")
     except Exception as e:
-        # Это обязательно нужно, чтобы бот не падал при ошибках
-        bot.reply_to(message, f"⚠️ Ошибка ИИ: {str(e)[:100]}...")
-    # -----------------------------
-
-        
-        
+        bot.reply_to(message, f"⚠️ Ошибка ИИ: {str(e)[:50]}")
+           
         
         
     # --- ЗАПУСК БОТА И СЕРВЕРА ---
