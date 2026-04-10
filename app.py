@@ -551,7 +551,7 @@ def lelouch_ai(message):
 
     bot.send_chat_action(message.chat.id, 'typing')
     try:
-        response = ai_model.generate_content(f"Ты — Лелуш. Отвечай кратко: {query}")
+        response = ai_model.generate_content(f"Ты — Лелуш. Отвечай вдумчиво, пафосно: {query}")
         bot.reply_to(message, f"👁 **Лелуш:**\n\n{response.text}")
     except Exception as e:
         bot.reply_to(message, f"⚠️ Ошибка ИИ: {str(e)[:50]}")
