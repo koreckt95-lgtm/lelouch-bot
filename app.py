@@ -30,7 +30,7 @@ bot = telebot.TeleBot(TOKEN)
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 if GEMINI_KEY:
     genai.configure(api_key=GEMINI_KEY)
-    ai_model = genai.GenerativeModel('gemini-1.5-flash') 
+    ai_model = genai.GenerativeModel('gemini-2.5-flash')
 else:
     ai_model = None
     
