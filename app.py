@@ -175,32 +175,27 @@ def casino(message):
         update_rep(u[0], -bet)
         bot.reply_to(message, f"📉 **ПРОИГРЫШ!** -{bet} 🪷\nБаланс: {u[2]-bet}")
 
-@bot.message_handler(func=lambda m: m.text and "ТОП" in m.text.upper())
+@bot.message_handler(func=lambda m: m.text and ("🏆 ТОП" in m.text or m.text.lower().startswith("топ")))
 def top(message):
     try:
-        # Получаем топ-10 богачей
+        # Используем контекстный менеджер или проверяем соединение
         cursor.execute("SELECT name, rep FROM users ORDER BY rep DESC LIMIT 10")
         res = cursor.fetchall()
         
         if not res:
-            return bot.send_message(message.chat.id, "📭 В списках Ордена пока пусто.")
+            return bot.send_message(message.chat.id, "📭 База данных пуста.")
 
-        top_msg = "🏆 **СПИСОК ЛИДЕРОВ (БОГАТЕЙШИЕ):**\n"
-        top_msg += "━━━━━━━━━━━━━━━━━━━━\n"
-        
+        top_msg = "🏆 **СПИСОК ЛИДЕРОВ:**\n\n"
         for i, row in enumerate(res, 1):
-            # Добавляем медали для первой тройки
-            medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else f"{i}."
-            top_msg += f"{medal} {row[0]} — `{row[1]}` 🪷\n"
-        
-        top_msg += "━━━━━━━━━━━━━━━━━━━━\n"
-        top_msg += "👁 _Деньги — это лишь средство._"
+            # Ограничим длину имени, чтобы верстка не ехала
+            name = row[0][:15] if row[0] else "Странник"
+            top_msg += f"{i}. {name} — {row[1]} 🪷\n"
         
         bot.send_message(message.chat.id, top_msg, parse_mode="Markdown")
     except Exception as e:
-        print(f"Ошибка ТОПа: {e}")
-        bot.reply_to(message, "⚠️ Ошибка при чтении архивов Ордена.")
-                              
+        print(f"Ошибка в ТОПе: {e}")
+        bot.reply_to(message, "⚠️ Не удалось открыть список лидеров.")
+        
 
 # --- РП И БРАКИ ---
 
