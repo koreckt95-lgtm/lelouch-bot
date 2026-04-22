@@ -175,14 +175,32 @@ def casino(message):
         update_rep(u[0], -bet)
         bot.reply_to(message, f"📉 **ПРОИГРЫШ!** -{bet} 🪷\nБаланс: {u[2]-bet}")
 
-@bot.message_handler(func=lambda m: m.text == "🏆 ТОП")
+@bot.message_handler(func=lambda m: m.text and "ТОП" in m.text.upper())
 def top(message):
-    cursor.execute("SELECT name, rep FROM users ORDER BY rep DESC LIMIT 10")
-    res = cursor.fetchall()
-    top_msg = "🏆 **СПИСОК ЛИДЕРОВ:**\n\n"
-    for i, row in enumerate(res, 1):
-        top_msg += f"{i}. {row[0]} — {row[1]} 🪷\n"
-    bot.send_message(message.chat.id, top_msg, parse_mode="Markdown")
+    try:
+        # Получаем топ-10 богачей
+        cursor.execute("SELECT name, rep FROM users ORDER BY rep DESC LIMIT 10")
+        res = cursor.fetchall()
+        
+        if not res:
+            return bot.send_message(message.chat.id, "📭 В списках Ордена пока пусто.")
+
+        top_msg = "🏆 **СПИСОК ЛИДЕРОВ (БОГАТЕЙШИЕ):**\n"
+        top_msg += "━━━━━━━━━━━━━━━━━━━━\n"
+        
+        for i, row in enumerate(res, 1):
+            # Добавляем медали для первой тройки
+            medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else f"{i}."
+            top_msg += f"{medal} {row[0]} — `{row[1]}` 🪷\n"
+        
+        top_msg += "━━━━━━━━━━━━━━━━━━━━\n"
+        top_msg += "👁 _Деньги — это лишь средство._"
+        
+        bot.send_message(message.chat.id, top_msg, parse_mode="Markdown")
+    except Exception as e:
+        print(f"Ошибка ТОПа: {e}")
+        bot.reply_to(message, "⚠️ Ошибка при чтении архивов Ордена.")
+                              
 
 # --- РП И БРАКИ ---
 
